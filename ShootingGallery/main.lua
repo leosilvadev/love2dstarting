@@ -68,6 +68,7 @@ function love.mousepressed(x, y, button, istouch, presses)
             
             sounds.targetHit:play()
         else
+            game.score = game.score > 0 and game.score -1 or 0
             sounds.shoot:play()
         end
     elseif not playing() and button == 1 then
