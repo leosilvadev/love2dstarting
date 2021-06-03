@@ -20,7 +20,8 @@ function love.load()
 
     sounds = {
         shoot = love.audio.newSource("sounds/shoot.wav", "static"),
-        targetHit = love.audio.newSource("sounds/target-hit.wav", "static")
+        strongShoot = love.audio.newSource("sounds/strong_shoot.wav", "static"),
+        targetHit = love.audio.newSource("sounds/target_hit.wav", "static")
     }
 
     love.mouse.setVisible(false)
@@ -59,17 +60,25 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
-    if playing() and button == 1 then
+    if playing() and (button == 1 or button == 2) then
         local mouseToTarget = distanceBetween(x, y, target.x, target.y)
+        local plusScore = 1
+        local failedSound = sounds.shoot
+
+        if button == 2 then
+            plusScore = 2
+            failedSound = sounds.strongShoot
+        end
+
         if mouseToTarget < target.radius then
-            game.score = game.score + 1
+            game.score = game.score + plusScore
             target.x = math.random(target.radius, love.graphics.getWidth() - target.radius)
             target.y = math.random(target.radius, love.graphics.getHeight() - target.radius)
             
             sounds.targetHit:play()
         else
             game.score = game.score > 0 and game.score -1 or 0
-            sounds.shoot:play()
+            failedSound:play()
         end
     elseif not playing() and button == 1 then
         game.state = 2
