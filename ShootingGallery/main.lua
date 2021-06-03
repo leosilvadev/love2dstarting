@@ -13,6 +13,11 @@ function love.load()
     sprites.sky = love.graphics.newImage("sprites/sky.png")
     sprites.crosshairs = love.graphics.newImage("sprites/crosshairs.png")
     sprites.target = love.graphics.newImage("sprites/target.png")
+
+    sounds = {}
+    sounds.shoot = love.audio.newSource("sounds/shoot.wav", "static")
+    sounds.targetHit = love.audio.newSource("sounds/target-hit.wav", "static")
+
     love.mouse.setVisible(false)
 end
 
@@ -44,6 +49,10 @@ function love.mousepressed(x, y, button, istouch, presses)
             score = score + 1
             target.x = math.random(target.radius, love.graphics.getWidth() - target.radius)
             target.y = math.random(target.radius, love.graphics.getHeight() - target.radius)
+            
+            sounds.targetHit:play()
+        else
+            sounds.shoot:play()
         end
     end
 end
