@@ -1,35 +1,40 @@
 function love.load()
-    target = {}
-    target.x = 300
-    target.y = 300
-    target.radius = 50
+    target = {
+        x = 300,
+        y = 300,
+        radius = 50
+    }
 
-    score = 0
-    timer = 0
-    gameState = 1
+    game = {
+        score = 0,
+        timer = 0,
+        state = 1,
+        font = love.graphics.newFont(40)
+    }
 
-    gameFont = love.graphics.newFont(40)
+    sprites = {
+        sky = love.graphics.newImage("sprites/sky.png"),
+        crosshairs = love.graphics.newImage("sprites/crosshairs.png"),
+        target = love.graphics.newImage("sprites/target.png")
+    }
 
-    sprites = {}
-    sprites.sky = love.graphics.newImage("sprites/sky.png")
-    sprites.crosshairs = love.graphics.newImage("sprites/crosshairs.png")
-    sprites.target = love.graphics.newImage("sprites/target.png")
-
-    sounds = {}
-    sounds.shoot = love.audio.newSource("sounds/shoot.wav", "static")
-    sounds.targetHit = love.audio.newSource("sounds/target-hit.wav", "static")
+    sounds = {
+        shoot = love.audio.newSource("sounds/shoot.wav", "static"),
+        targetHit = love.audio.newSource("sounds/target-hit.wav", "static")
+    }
 
     love.mouse.setVisible(false)
 end
 
 function love.update(dt)
-    if gameState == 2 then
-        if timer > 0 then
-            timer = timer - dt
+    if playing() then
+        if game.timer > 0 then
+            game.timer = game.timer - dt
         end
-        if timer < 0 then 
-            timer = 0
-            gameState = 1
+        if game.timer < 0 then 
+            game.timer = 0
+            game.state = 1
+            game.score = 0
         end 
     end
 end
@@ -38,15 +43,15 @@ function love.draw()
     love.graphics.draw(sprites.sky, 0, 0)
 
     love.graphics.setColor(1, 1, 1)
-    love.graphics.setFont(gameFont)
-    love.graphics.print("Score: " .. score, 0, 0)
-    love.graphics.print("Timer: " .. math.ceil(timer), 300, 0)
+    love.graphics.setFont(game.font)
+    love.graphics.print("Score: " .. game.score, 0, 0)
+    love.graphics.print("Timer: " .. math.ceil(game.timer), 300, 0)
 
-    if gameState == 1 then
+    if not playing() then
         love.graphics.printf("Click anywhere to begin!", 0, 250, love.graphics.getWidth(), "center")
     end
 
-    if gameState == 2 then
+    if playing() then
         love.graphics.draw(sprites.target, target.x - target.radius, target.y - target.radius + 10)
     end
 
@@ -54,10 +59,10 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
-    if gameState == 2 and button == 1 then
+    if playing() and button == 1 then
         local mouseToTarget = distanceBetween(x, y, target.x, target.y)
         if mouseToTarget < target.radius then
-            score = score + 1
+            game.score = game.score + 1
             target.x = math.random(target.radius, love.graphics.getWidth() - target.radius)
             target.y = math.random(target.radius, love.graphics.getHeight() - target.radius)
             
@@ -65,12 +70,14 @@ function love.mousepressed(x, y, button, istouch, presses)
         else
             sounds.shoot:play()
         end
-    elseif gameState == 1 and button == 1 then
-        gameState = 2
-        timer = 10
-        score = 0
+    elseif not playing() and button == 1 then
+        game.state = 2
+        game.timer = 10
+        game.score = 0
     end
 end
+
+function playing() return game.state == 2 end
 
 function distanceBetween(x1, y1, x2, y2)
     return math.sqrt((x2 - x1)^2 + (y2 - y1)^2)
