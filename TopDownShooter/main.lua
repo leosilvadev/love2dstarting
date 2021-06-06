@@ -6,6 +6,11 @@ function love.load()
         zombie = love.graphics.newImage('images/zombie.png')
     }
 
+    sounds = {
+        shoot = love.audio.newSource("sounds/shoot.wav", "static"),
+        zombieDie = love.audio.newSource("sounds/zombie_die.wav", "static")
+    }
+
     player = {
         x = love.graphics.getWidth() / 2,
         y = love.graphics.getHeight() / 2,
@@ -67,6 +72,7 @@ function love.update(dt)
             if distanceBetween(bullet, zombie) < 20 then
                 table.remove(bullets, index)
                 table.remove(zombies, zombieKey)
+                sounds.zombieDie:play()
             end 
         end
     end
@@ -125,6 +131,7 @@ end
 function love.mousepressed(x, y, button, isTouched)
     if button == 1 then
         spawnBullet()
+        sounds.shoot:play()
     end
 end
 
