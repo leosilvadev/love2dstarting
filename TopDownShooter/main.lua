@@ -12,8 +12,8 @@ function love.load()
     }
 
     player = {
-        x = love.graphics.getWidth() / 2,
-        y = love.graphics.getHeight() / 2,
+        x = halfWidthSizeOf(love.graphics),
+        y = halfHeightSizeOf(love.graphics),
         rotation = 0,
         speed = 180
     }
@@ -25,7 +25,10 @@ end
 
 function love.update(dt)
     if love.keyboard.isDown('d') then
-        player.x = player.x + player.speed * dt
+        local newPosition = player.x + player.speed * dt
+        if newPosition < love.graphics.getWidth() - halfWidthSizeOf(images.player) then
+            player.x = newPosition
+        end
         if love.keyboard.isDown('s') then
             player.rotation = player.rotation + 0.05
         end
@@ -35,7 +38,10 @@ function love.update(dt)
     end
         
     if love.keyboard.isDown('a') then
-        player.x = player.x - player.speed * dt
+        local newPosition = player.x - player.speed * dt
+        if newPosition >= halfWidthSizeOf(images.player) then
+            player.x = newPosition
+        end
         if love.keyboard.isDown('s') then
             player.rotation = player.rotation + 0.05
         end
@@ -45,11 +51,17 @@ function love.update(dt)
     end
 
     if love.keyboard.isDown('s') then
-        player.y = player.y + player.speed * dt
+        local newPosition = player.y + player.speed * dt
+        if newPosition < love.graphics.getHeight() - halfHeightSizeOf(images.player) then
+            player.y = newPosition
+        end
     end
 
     if love.keyboard.isDown('w') then
-        player.y = player.y - player.speed * dt
+        local newPosition = player.y - player.speed * dt
+        if newPosition > halfHeightSizeOf(images.player) then
+            player.y = newPosition
+        end
     end
 
     for index, zombie in ipairs(zombies) do
@@ -86,8 +98,8 @@ function love.draw()
         player.y, 
         playMouseAngle(), 
         nil, nil, 
-        images.player:getWidth() / 2, 
-        images.player:getHeight() / 2
+        halfWidthSizeOf(images.player), 
+        halfHeightSizeOf(images.player)
     )
 
     for index, zombie in ipairs(zombies) do
@@ -97,8 +109,8 @@ function love.draw()
             zombie.y,
             zombieAngle(zombie),
             nil, nil,
-            images.zombie:getWidth() / 2, 
-            images.zombie:getHeight() / 2
+            halfWidthSizeOf(images.zombie), 
+            halfHeightSizeOf(images.zombie)
         )
         if  distanceBetween(zombie, player) < 30 then
             for index, value in ipairs(zombies) do
@@ -116,8 +128,8 @@ function love.draw()
             bullet.x,
             bullet.y,
             nil, 0.5, 0.5,
-            images.bullet:getWidth() / 2, 
-            images.bullet:getHeight() / 2
+            halfWidthSizeOf(images.bullet), 
+            halfHeightSizeOf(images.bullet)
         )
     end
 end
@@ -168,4 +180,12 @@ end
 
 function isOutOfScene(object)
     return object.x < 0 or object.x > love.graphics.getWidth() or object.y < 0 or object.y > love.graphics.getHeight()
+end
+
+function halfWidthSizeOf(image)
+    return image:getWidth() / 2
+end
+
+function halfHeightSizeOf(image)
+    return image:getHeight() / 2
 end
