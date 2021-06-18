@@ -3,13 +3,14 @@ require('functions')
 local Zombie = require('zombie')
 local Player = require('player')
 local Bullet = require('bullet')
+local game = {}
 
 function love.conf(t)
     t.console = true
 end
 
 function love.load()
-    images = {
+    game.images = {
         background = love.graphics.newImage('images/background.png'),
         bullet = Bullet:loadImage(),
         player = Player:loadPlayerImage(),
@@ -17,7 +18,7 @@ function love.load()
         zombie = Zombie:loadImage()
     }
 
-    sounds = {
+    game.sounds = {
         shoot = Player:loadShootSound(),
         manScream = Player:loadScreamSound(),
         manSteps = Player:loadStepsSound()
@@ -38,9 +39,9 @@ function love.update(dt)
         isMovingLeft() or
         isMovingDown() or
         isMovingTop() then
-        sounds.manSteps:play()
+        game.sounds.manSteps:play()
     else
-        sounds.manSteps:stop()
+        game.sounds.manSteps:stop()
     end
 
     if isMovingRight() then
@@ -77,57 +78,57 @@ function love.update(dt)
 end
 
 function love.draw()
-    love.graphics.draw(images.background, 0, 0)
+    love.graphics.draw(game.images.background, 0, 0)
     love.graphics.setColor(33, 209, 14)
     love.graphics.rectangle('fill', 0, 0, love.graphics.getWidth(), 100)
 
     if Player:isDying() then
-        sounds.manSteps:stop()
-        sounds.manScream:play()
+        game.sounds.manSteps:stop()
+        game.sounds.manScream:play()
         return
     end
 
     if Player:isDead() then
         love.graphics.setColor(255, 255, 255, 128)
         love.graphics.draw(
-            images.rip, 
-            (love.graphics.getWidth() - images.rip:getWidth() / 2) / 2, 
-            (love.graphics.getHeight() - images.rip:getHeight() / 2) / 2, 
+            game.images.rip, 
+            (love.graphics.getWidth() - game.images.rip:getWidth() / 2) / 2, 
+            (love.graphics.getHeight() - game.images.rip:getHeight() / 2) / 2, 
             nil, 0.5, 0.5
         )
         return
     else
         love.graphics.draw(
-            images.player, 
+            game.images.player, 
             Player:get().x, 
             Player:get().y, 
             playMouseAngle(), 
             nil, nil, 
-            halfWidthSizeOf(images.player), 
-            halfHeightSizeOf(images.player)
+            halfWidthSizeOf(game.images.player), 
+            halfHeightSizeOf(game.images.player)
         )
     end
 
     for _, aZombie in ipairs(Zombie:all()) do
         love.graphics.draw(
-            images.zombie,
+            game.images.zombie,
             aZombie.x,
             aZombie.y,
             zombieAngle(aZombie),
             nil, nil,
-            halfWidthSizeOf(images.zombie), 
-            halfHeightSizeOf(images.zombie)
+            halfWidthSizeOf(game.images.zombie), 
+            halfHeightSizeOf(game.images.zombie)
         )
     end
 
     for index, bullet in ipairs(Bullet:all()) do
         love.graphics.draw(
-            images.bullet,
+            game.images.bullet,
             bullet.x,
             bullet.y,
             nil, 0.5, 0.5,
-            halfWidthSizeOf(images.bullet), 
-            halfHeightSizeOf(images.bullet)
+            halfWidthSizeOf(game.images.bullet), 
+            halfHeightSizeOf(game.images.bullet)
         )
     end
 end
@@ -149,7 +150,7 @@ function love.mousepressed(x, y, button, isTouched)
 
     if button == 1 then
         Player:shoot(500)
-        sounds.shoot:play()
+        game.sounds.shoot:play()
     end
 end
 
