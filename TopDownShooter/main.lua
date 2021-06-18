@@ -3,7 +3,10 @@ require('functions')
 local Zombie = require('zombie')
 local Player = require('player')
 local Bullet = require('bullet')
-local game = {}
+local game = {
+    zombiesKilled = 0,
+    headerFontTitle = love.graphics.newFont(34)
+}
 
 function love.conf(t)
     t.console = true
@@ -72,6 +75,7 @@ function love.update(dt)
         if die then
             Bullet:remove(bulletIndex)
             Zombie:die(zombieKey)
+            game.zombiesKilled = game.zombiesKilled + 1
             Zombie:loadDieSound():play()
         end
     end
@@ -79,8 +83,15 @@ end
 
 function love.draw()
     love.graphics.draw(game.images.background, 0, 0)
-    love.graphics.setColor(33, 209, 14)
-    love.graphics.rectangle('fill', 0, 0, love.graphics.getWidth(), 100)
+
+    love.graphics.setFont(game.headerFontTitle)
+    love.graphics.print("Killed", 20, 10)
+    
+    if game.zombiesKilled < 10 then
+        love.graphics.print(game.zombiesKilled, 55, 50)
+    elseif game.zombiesKilled < 100 then
+        love.graphics.print(game.zombiesKilled, 45, 50)
+    end
 
     if Player:isDying() then
         game.sounds.manSteps:stop()
