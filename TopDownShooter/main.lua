@@ -9,18 +9,16 @@ function love.load()
     images = {
         background = love.graphics.newImage('images/background.png'),
         bullet = love.graphics.newImage('images/bullet.png'),
-        player = Player.loadImage(),
-        zombie = Zombies.loadImage(),
-        rip = love.graphics.newImage('images/rip.png')
+        player = Player.loadPlayerImage(),
+        rip = Player.loadRIPImage(),
+        zombie = Zombies.loadImage()
     }
 
     sounds = {
-        shoot = love.audio.newSource("sounds/shoot.wav", "static"),
-        manScream = love.audio.newSource("sounds/scream.mp3", "static"),
-        manSteps = love.audio.newSource("sounds/man_steps.mp3", "static")
+        shoot = Player.loadShootSound(),
+        manScream = Player.loadScreamSound(),
+        manSteps = Player.loadStepsSound()
     }
-
-    sounds.manSteps:setVolume(0.2)
 
     bullets = {}
 end

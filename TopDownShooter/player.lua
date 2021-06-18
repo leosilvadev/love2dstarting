@@ -29,8 +29,26 @@ function startToDie()
     player.status = "dying"
 end
 
-function loadImage()
+function loadPlayerImage()
     return love.graphics.newImage('images/player.png')
+end
+
+function loadRIPImage()
+    return love.graphics.newImage('images/rip.png')
+end
+
+function loadStepsSound()
+    local sound = love.audio.newSource("sounds/man_steps.mp3", "static")
+    sound:setVolume(0.2)
+    return sound
+end
+
+function loadScreamSound()
+    return love.audio.newSource("sounds/scream.mp3", "static")
+end
+
+function loadShootSound()
+    return love.audio.newSource("sounds/shoot.wav", "static")
 end
 
 function moveRight(dt)
@@ -59,7 +77,11 @@ return {
     isDying = isDying,
     die = die,
     startToDie = startToDie,
-    loadImage = loadImage,
+    loadPlayerImage = loadPlayerImage,
+    loadRIPImage = loadRIPImage,
+    loadStepsSound = loadStepsSound,
+    loadScreamSound = loadScreamSound,
+    loadShootSound = loadShootSound,
     moveRight = moveRight,
     moveLeft = moveLeft,
     moveDown = moveDown,
