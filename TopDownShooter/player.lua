@@ -1,5 +1,7 @@
 require('functions')
 
+local Bullet = require('bullet')
+
 Player = {
     x = halfWidthSizeOf(love.graphics),
     y = halfHeightSizeOf(love.graphics),
@@ -49,6 +51,10 @@ end
 
 function Player:loadShootSound()
     return love.audio.newSource("sounds/shoot.wav", "static")
+end
+
+function Player:shoot(speed)
+    Bullet:spawn(self.x, self.y, speed)
 end
 
 function Player:moveRight(dt)

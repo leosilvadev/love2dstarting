@@ -1,5 +1,8 @@
+require('functions')
+
 local Zombie = require('zombie')
 local Player = require('player')
+local Bullet = require('bullet')
 
 function love.conf(t)
     t.console = true
@@ -8,7 +11,7 @@ end
 function love.load()
     images = {
         background = love.graphics.newImage('images/background.png'),
-        bullet = love.graphics.newImage('images/bullet.png'),
+        bullet = Bullet:loadImage(),
         player = Player:loadPlayerImage(),
         rip = Player:loadRIPImage(),
         zombie = Zombie:loadImage()
@@ -19,8 +22,6 @@ function love.load()
         manScream = Player:loadScreamSound(),
         manSteps = Player:loadStepsSound()
     }
-
-    bullets = {}
 end
 
 function love.update(dt)
@@ -29,9 +30,7 @@ function love.update(dt)
     end
 
     if Player:isDead() then
-        for index, bullet in ipairs(bullets) do
-            table.remove(bullets, index)
-        end
+        Bullet:removeAll()
         return
     end
 
@@ -65,15 +64,15 @@ function love.update(dt)
         Player:startToDie()
     end
 
-    for index, bullet in ipairs(bullets) do
+    for index, bullet in ipairs(Bullet:all()) do
         bullet.x = bullet.x + (math.cos(bullet.direction) * bullet.speed * dt)
         bullet.y = bullet.y + (math.sin(bullet.direction) * bullet.speed * dt)
     end
 
     for zombieKey, aZombie in ipairs(Zombie:all()) do
-        local die, bulletIndex = Zombie:mustDie(aZombie, bullets)
+        local die, bulletIndex = Zombie:mustDie(aZombie, Bullet:all())
         if die then
-            table.remove(bullets, bulletIndex)
+            Bullet:remove(bulletIndex)
             Zombie:die(zombieKey)
             Zombie:loadDieSound():play()
         end
@@ -124,7 +123,7 @@ function love.draw()
         )
     end
 
-    for index, bullet in ipairs(bullets) do
+    for index, bullet in ipairs(Bullet:all()) do
         love.graphics.draw(
             images.bullet,
             bullet.x,
@@ -152,7 +151,7 @@ function love.mousepressed(x, y, button, isTouched)
     end
 
     if button == 1 then
-        spawnBullet()
+        Player:shoot(500)
         sounds.shoot:play()
     end
 end
@@ -169,22 +168,8 @@ function zombieAngle(aZombie)
     return math.atan2(Player:get().y - aZombie.y, Player:get().x - aZombie.x)
 end
 
-function playMouseAngle()
-    return math.atan2(love.mouse.getY() - Player:get().y, love.mouse.getX() - Player:get().x)
-end
-
 function distanceBetween(objectOne, objectTwo)
     return math.sqrt((objectTwo.x - objectOne.x) ^ 2 + (objectTwo.y - objectOne.y) ^ 2)
-end
-
-function spawnBullet()
-    local bullet = {
-        x = Player:get().x,
-        y = Player:get().y,
-        speed = 500,
-        direction = playMouseAngle()
-    }
-    table.insert(bullets, bullet)
 end
 
 function isOutOfScene(object)

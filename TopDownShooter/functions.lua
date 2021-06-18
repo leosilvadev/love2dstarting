@@ -22,9 +22,14 @@ function moveTo(object, objectImage, coordinates)
     end
 end
 
+function playMouseAngle()
+    return math.atan2(love.mouse.getY() - Player:get().y, love.mouse.getX() - Player:get().x)
+end
+
 return {
     distanceBetween = distanceBetween,
     halfWidthSizeOf = halfWidthSizeOf,
     halfHeightSizeOf = halfHeightSizeOf,
-    moveTo = moveTo
+    moveTo = moveTo,
+    playMouseAngle = playMouseAngle
 }
