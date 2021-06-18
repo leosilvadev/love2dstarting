@@ -64,10 +64,7 @@ function love.update(dt)
         Player:startToDie()
     end
 
-    for index, bullet in ipairs(Bullet:all()) do
-        bullet.x = bullet.x + (math.cos(bullet.direction) * bullet.speed * dt)
-        bullet.y = bullet.y + (math.sin(bullet.direction) * bullet.speed * dt)
-    end
+    Bullet:moveAll(dt)
 
     for zombieKey, aZombie in ipairs(Zombie:all()) do
         local die, bulletIndex = Zombie:mustDie(aZombie, Bullet:all())
