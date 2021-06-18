@@ -1,4 +1,4 @@
-local Zombies = require('zombies')
+local Zombie = require('zombie')
 local Player = require('player')
 
 function love.conf(t)
@@ -11,7 +11,7 @@ function love.load()
         bullet = love.graphics.newImage('images/bullet.png'),
         player = Player:loadPlayerImage(),
         rip = Player:loadRIPImage(),
-        zombie = Zombies.loadImage()
+        zombie = Zombie:loadImage()
     }
 
     sounds = {
@@ -60,8 +60,8 @@ function love.update(dt)
         Player:moveTop(dt)
     end
 
-    Zombies.moveAllInDirectionOf(Player:get(), dt)
-    if Zombies.anyMustKill(Player:get()) then
+    Zombie:moveAllInDirectionOf(Player:get(), dt)
+    if Zombie:anyMustKill(Player:get()) then
         Player:startToDie()
     end
 
@@ -70,11 +70,12 @@ function love.update(dt)
         bullet.y = bullet.y + (math.sin(bullet.direction) * bullet.speed * dt)
     end
 
-    for zombieKey, aZombie in ipairs(Zombies.all()) do
-        local die, bulletIndex = Zombies.mustDie(aZombie, bullets)
+    for zombieKey, aZombie in ipairs(Zombie:all()) do
+        local die, bulletIndex = Zombie:mustDie(aZombie, bullets)
         if die then
             table.remove(bullets, bulletIndex)
-            Zombies.die(zombieKey)
+            Zombie:die(zombieKey)
+            Zombie:loadDieSound():play()
         end
     end
 end
@@ -111,7 +112,7 @@ function love.draw()
         )
     end
 
-    for _, aZombie in ipairs(Zombies.all()) do
+    for _, aZombie in ipairs(Zombie:all()) do
         love.graphics.draw(
             images.zombie,
             aZombie.x,
@@ -141,7 +142,7 @@ function love.keypressed(key)
     end
 
     if key == 'space' then
-        Zombies.spawn()
+        Zombie:spawn()
     end
 end
 
