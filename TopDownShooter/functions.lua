@@ -14,7 +14,7 @@ end
 
 function moveTo(object, objectImage, coordinates)
     if coordinates.x >= halfWidthSizeOf(objectImage) and
-        coordinates.y >= halfHeightSizeOf(objectImage) and
+        coordinates.y >= halfHeightSizeOf(objectImage) + 100 and
         coordinates.x < love.graphics.getWidth() - halfWidthSizeOf(objectImage) and
         coordinates.y < love.graphics.getHeight() - halfHeightSizeOf(objectImage) then
             object.x = coordinates.x

@@ -9,26 +9,26 @@ function love.load()
     images = {
         background = love.graphics.newImage('images/background.png'),
         bullet = love.graphics.newImage('images/bullet.png'),
-        player = Player.loadPlayerImage(),
-        rip = Player.loadRIPImage(),
+        player = Player:loadPlayerImage(),
+        rip = Player:loadRIPImage(),
         zombie = Zombies.loadImage()
     }
 
     sounds = {
-        shoot = Player.loadShootSound(),
-        manScream = Player.loadScreamSound(),
-        manSteps = Player.loadStepsSound()
+        shoot = Player:loadShootSound(),
+        manScream = Player:loadScreamSound(),
+        manSteps = Player:loadStepsSound()
     }
 
     bullets = {}
 end
 
 function love.update(dt)
-    if Player.isDying() then
-        Player.die()
+    if Player:isDying() then
+        Player:die()
     end
 
-    if Player.isDead() then
+    if Player:isDead() then
         for index, bullet in ipairs(bullets) do
             table.remove(bullets, index)
         end
@@ -45,24 +45,24 @@ function love.update(dt)
     end
 
     if isMovingRight() then
-        Player.moveRight(dt)
+        Player:moveRight(dt)
     end
         
     if isMovingLeft() then
-        Player.moveLeft(dt)
+        Player:moveLeft(dt)
     end
 
     if isMovingDown() then
-        Player.moveDown(dt)
+        Player:moveDown(dt)
     end
 
     if isMovingTop() then
-        Player.moveTop(dt)
+        Player:moveTop(dt)
     end
 
-    Zombies.moveAllInDirectionOf(Player.get(), dt)
-    if Zombies.anyMustKill(Player.get()) then
-        Player.startToDie()
+    Zombies.moveAllInDirectionOf(Player:get(), dt)
+    if Zombies.anyMustKill(Player:get()) then
+        Player:startToDie()
     end
 
     for index, bullet in ipairs(bullets) do
@@ -81,14 +81,16 @@ end
 
 function love.draw()
     love.graphics.draw(images.background, 0, 0)
+    love.graphics.setColor(33, 209, 14)
+    love.graphics.rectangle('fill', 0, 0, love.graphics.getWidth(), 100)
 
-    if Player.isDying() then
+    if Player:isDying() then
         sounds.manSteps:stop()
         sounds.manScream:play()
         return
     end
 
-    if Player.isDead() then
+    if Player:isDead() then
         love.graphics.setColor(255, 255, 255, 128)
         love.graphics.draw(
             images.rip, 
@@ -100,8 +102,8 @@ function love.draw()
     else
         love.graphics.draw(
             images.player, 
-            Player.get().x, 
-            Player.get().y, 
+            Player:get().x, 
+            Player:get().y, 
             playMouseAngle(), 
             nil, nil, 
             halfWidthSizeOf(images.player), 
@@ -134,7 +136,7 @@ function love.draw()
 end
 
 function love.keypressed(key)
-    if Player.get().dead then
+    if Player:get().dead then
         return
     end
 
@@ -144,7 +146,7 @@ function love.keypressed(key)
 end
 
 function love.mousepressed(x, y, button, isTouched)
-    if Player.get().dead then
+    if Player:get().dead then
         return
     end
 
@@ -162,22 +164,12 @@ function isMovingLeft() return love.keyboard.isDown('a') end
 
 function isMovingTop() return love.keyboard.isDown('w') end
 
-function moveTo(object, objectImage, coordinates)
-    if coordinates.x >= halfWidthSizeOf(objectImage) and
-        coordinates.y >= halfHeightSizeOf(objectImage) and
-        coordinates.x < love.graphics.getWidth() - halfWidthSizeOf(objectImage) and
-        coordinates.y < love.graphics.getHeight() - halfHeightSizeOf(objectImage) then
-            object.x = coordinates.x
-            object.y = coordinates.y
-    end
-end
-
 function zombieAngle(aZombie)
-    return math.atan2(Player.get().y - aZombie.y, Player.get().x - aZombie.x)
+    return math.atan2(Player:get().y - aZombie.y, Player:get().x - aZombie.x)
 end
 
 function playMouseAngle()
-    return math.atan2(love.mouse.getY() - Player.get().y, love.mouse.getX() - Player.get().x)
+    return math.atan2(love.mouse.getY() - Player:get().y, love.mouse.getX() - Player:get().x)
 end
 
 function distanceBetween(objectOne, objectTwo)
@@ -186,8 +178,8 @@ end
 
 function spawnBullet()
     local bullet = {
-        x = Player.get().x,
-        y = Player.get().y,
+        x = Player:get().x,
+        y = Player:get().y,
         speed = 500,
         direction = playMouseAngle()
     }

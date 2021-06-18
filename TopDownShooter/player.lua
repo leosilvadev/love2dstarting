@@ -1,6 +1,6 @@
 require('functions')
 
-local player = {
+Player = {
     x = halfWidthSizeOf(love.graphics),
     y = halfHeightSizeOf(love.graphics),
     rotation = 0,
@@ -9,81 +9,66 @@ local player = {
     screamed = false
 }
 
-function get()
-    return player
+function Player:get()
+    return self
 end
 
-function isDead()
-    return player.status == "dead"
+function Player:isDead()
+    return self.status == "dead"
 end
 
-function isDying()
-    return player.status == "dying"
+function Player:isDying()
+    return self.status == "dying"
 end
 
-function die()
-    player.status = "dead"
+function Player:die()
+    self.status = "dead"
 end
 
-function startToDie()
-    player.status = "dying"
+function Player:startToDie()
+    self.status = "dying"
 end
 
-function loadPlayerImage()
+function Player:loadPlayerImage()
     return love.graphics.newImage('images/player.png')
 end
 
-function loadRIPImage()
+function Player:loadRIPImage()
     return love.graphics.newImage('images/rip.png')
 end
 
-function loadStepsSound()
+function Player:loadStepsSound()
     local sound = love.audio.newSource("sounds/man_steps.mp3", "static")
     sound:setVolume(0.2)
     return sound
 end
 
-function loadScreamSound()
+function Player:loadScreamSound()
     return love.audio.newSource("sounds/scream.mp3", "static")
 end
 
-function loadShootSound()
+function Player:loadShootSound()
     return love.audio.newSource("sounds/shoot.wav", "static")
 end
 
-function moveRight(dt)
-    local newPosition = player.x + player.speed * dt
-    moveTo(player, images.player, {x = newPosition, y = player.y})
+function Player:moveRight(dt)
+    local newPosition = self.x + self.speed * dt
+    moveTo(self, images.player, {x = newPosition, y = self.y})
 end
 
-function moveLeft(dt)
-    local newPosition = player.x - player.speed * dt
-    moveTo(player, images.player, {x = newPosition, y = player.y})
+function Player:moveLeft(dt)
+    local newPosition = self.x - self.speed * dt
+    moveTo(self, images.player, {x = newPosition, y = self.y})
 end
 
-function moveDown(dt)
-    local newPosition = player.y + player.speed * dt
-    moveTo(player, images.player, {x = player.x, y = newPosition})
+function Player:moveDown(dt)
+    local newPosition = self.y + self.speed * dt
+    moveTo(self, images.player, {x = self.x, y = newPosition})
 end
 
-function moveTop(dt)
-    local newPosition = player.y - player.speed * dt
-    moveTo(player, images.player, {x = player.x, y = newPosition})
+function Player:moveTop(dt)
+    local newPosition = self.y - self.speed * dt
+    moveTo(self, images.player, {x = self.x, y = newPosition})
 end
 
-return {
-    get = get,
-    isDead = isDead,
-    isDying = isDying,
-    die = die,
-    startToDie = startToDie,
-    loadPlayerImage = loadPlayerImage,
-    loadRIPImage = loadRIPImage,
-    loadStepsSound = loadStepsSound,
-    loadScreamSound = loadScreamSound,
-    loadShootSound = loadShootSound,
-    moveRight = moveRight,
-    moveLeft = moveLeft,
-    moveDown = moveDown,
-    moveTop = moveTop
-}
+return Player
