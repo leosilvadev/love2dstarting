@@ -1,5 +1,4 @@
 local Zombie = require('zombie')
-local zombie = require "TopDownShooter.zombie"
 
 function love.conf(t)
     t.console = true
