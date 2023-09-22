@@ -1,212 +1,184 @@
+require('functions')
+
 local Zombie = require('zombie')
+local Player = require('player')
+local Bullet = require('bullet')
+local game = {
+    zombiesKilled = 0,
+    headerFontTitle = love.graphics.newFont(34)
+}
 
 function love.conf(t)
     t.console = true
 end
 
 function love.load()
-    images = {
+    game.images = {
         background = love.graphics.newImage('images/background.png'),
-        bullet = love.graphics.newImage('images/bullet.png'),
-        player = love.graphics.newImage('images/player.png'),
-        zombie = Zombie.loadImage(),
-        rip = love.graphics.newImage('images/rip.png')
+        bullet = Bullet:loadImage(),
+        player = Player:loadPlayerImage(),
+        rip = Player:loadRIPImage(),
+        zombie = Zombie:loadImage()
     }
 
-    sounds = {
-        shoot = love.audio.newSource("sounds/shoot.wav", "static"),
-        manScream = love.audio.newSource("sounds/scream.mp3", "static"),
-        manSteps = love.audio.newSource("sounds/man_steps.mp3", "static")
+    game.sounds = {
+        shoot = Player:loadShootSound(),
+        manScream = Player:loadScreamSound(),
+        manSteps = Player:loadStepsSound()
     }
-
-    sounds.manSteps:setVolume(0.2)
-
-    player = {
-        x = halfWidthSizeOf(love.graphics),
-        y = halfHeightSizeOf(love.graphics),
-        rotation = 0,
-        speed = 180,
-        dead = false,
-        screamed = false
-    }
-
-    bullets = {}
 end
 
 function love.update(dt)
-    if player.dead then
-        for index, bullet in ipairs(bullets) do
-            table.remove(bullets, index)
-        end
+    if Player:isDying() then
+        Player:die()
+    end
+
+    if Player:isDead() then
+        Bullet:removeAll()
         return
     end
 
-    if love.keyboard.isDown('d') or
-        love.keyboard.isDown('a') or
-        love.keyboard.isDown('s') or
-        love.keyboard.isDown('w') then
-        sounds.manSteps:play()
+    if isMovingRight() or
+        isMovingLeft() or
+        isMovingDown() or
+        isMovingTop() then
+        game.sounds.manSteps:play()
     else
-        sounds.manSteps:stop()
+        game.sounds.manSteps:stop()
     end
 
-    if love.keyboard.isDown('d') then
-        local newPosition = player.x + player.speed * dt
-        moveTo(player, images.player, {x = newPosition, y = player.y})
-
-        if love.keyboard.isDown('s') then
-            player.rotation = player.rotation + 0.05
-        end
-        if love.keyboard.isDown('w') then
-            player.rotation = player.rotation - 0.05
-        end
+    if isMovingRight() then
+        Player:moveRight(dt)
     end
         
-    if love.keyboard.isDown('a') then
-        local newPosition = player.x - player.speed * dt
-        moveTo(player, images.player, {x = newPosition, y = player.y})
-
-        if love.keyboard.isDown('s') then
-            player.rotation = player.rotation + 0.05
-        end
-        if love.keyboard.isDown('w') then
-            player.rotation = player.rotation - 0.05
-        end
+    if isMovingLeft() then
+        Player:moveLeft(dt)
     end
 
-    if love.keyboard.isDown('s') then
-        local newPosition = player.y + player.speed * dt
-        moveTo(player, images.player, {x = player.x, y = newPosition})
+    if isMovingDown() then
+        Player:moveDown(dt)
     end
 
-    if love.keyboard.isDown('w') then
-        local newPosition = player.y - player.speed * dt
-        moveTo(player, images.player, {x = player.x, y = newPosition})
+    if isMovingTop() then
+        Player:moveTop(dt)
     end
 
-    Zombie.moveAllInDirectionOf(player, dt)
-    if Zombie.anyMustKill(player) then
-        player.dead = true
+    Zombie:moveAllInDirectionOf(Player:get(), dt)
+    if Zombie:anyMustKill(Player:get()) then
+        Player:startToDie()
     end
 
-    for index, bullet in ipairs(bullets) do
-        bullet.x = bullet.x + (math.cos(bullet.direction) * bullet.speed * dt)
-        bullet.y = bullet.y + (math.sin(bullet.direction) * bullet.speed * dt)
-    end
+    Bullet:moveAll(dt)
 
-    for zombieKey, aZombie in ipairs(Zombie.all()) do
-        local die, bulletIndex = Zombie.mustDie(aZombie, bullets)
+    for zombieKey, aZombie in ipairs(Zombie:all()) do
+        local die, bulletIndex = Zombie:mustDie(aZombie, Bullet:all())
         if die then
-            table.remove(bullets, bulletIndex)
-            Zombie.die(zombieKey)
+            Bullet:remove(bulletIndex)
+            Zombie:die(zombieKey)
+            game.zombiesKilled = game.zombiesKilled + 1
+            Zombie:loadDieSound():play()
         end
     end
 end
 
 function love.draw()
-    love.graphics.draw(images.background, 0, 0)
+    love.graphics.draw(game.images.background, 0, 0)
 
-    if player.dead then
-        if player.screamed == false then
-            player.screamed = true
-            sounds.manSteps:stop()
-            sounds.manScream:play()
-        end
+    love.graphics.setFont(game.headerFontTitle)
+    love.graphics.print("Killed", 20, 10)
+    
+    if game.zombiesKilled < 10 then
+        love.graphics.print(game.zombiesKilled, 55, 50)
+    elseif game.zombiesKilled < 100 then
+        love.graphics.print(game.zombiesKilled, 45, 50)
+    end
+
+    if Player:isDying() then
+        game.sounds.manSteps:stop()
+        game.sounds.manScream:play()
+        return
+    end
+
+    if Player:isDead() then
         love.graphics.setColor(255, 255, 255, 128)
         love.graphics.draw(
-            images.rip, 
-            (love.graphics.getWidth() - images.rip:getWidth() / 2) / 2, 
-            (love.graphics.getHeight() - images.rip:getHeight() / 2) / 2, 
+            game.images.rip, 
+            (love.graphics.getWidth() - game.images.rip:getWidth() / 2) / 2, 
+            (love.graphics.getHeight() - game.images.rip:getHeight() / 2) / 2, 
             nil, 0.5, 0.5
         )
         return
     else
         love.graphics.draw(
-            images.player, 
-            player.x, 
-            player.y, 
+            game.images.player, 
+            Player:get().x, 
+            Player:get().y, 
             playMouseAngle(), 
             nil, nil, 
-            halfWidthSizeOf(images.player), 
-            halfHeightSizeOf(images.player)
+            halfWidthSizeOf(game.images.player), 
+            halfHeightSizeOf(game.images.player)
         )
     end
 
-    for _, aZombie in ipairs(Zombie.all()) do
+    for _, aZombie in ipairs(Zombie:all()) do
         love.graphics.draw(
-            images.zombie,
+            game.images.zombie,
             aZombie.x,
             aZombie.y,
             zombieAngle(aZombie),
             nil, nil,
-            halfWidthSizeOf(images.zombie), 
-            halfHeightSizeOf(images.zombie)
+            halfWidthSizeOf(game.images.zombie), 
+            halfHeightSizeOf(game.images.zombie)
         )
     end
 
-    for index, bullet in ipairs(bullets) do
+    for index, bullet in ipairs(Bullet:all()) do
         love.graphics.draw(
-            images.bullet,
+            game.images.bullet,
             bullet.x,
             bullet.y,
             nil, 0.5, 0.5,
-            halfWidthSizeOf(images.bullet), 
-            halfHeightSizeOf(images.bullet)
+            halfWidthSizeOf(game.images.bullet), 
+            halfHeightSizeOf(game.images.bullet)
         )
     end
 end
 
 function love.keypressed(key)
-    if player.dead then
+    if Player:get().dead then
         return
     end
 
     if key == 'space' then
-        Zombie.spawn()
+        Zombie:spawn()
     end
 end
 
 function love.mousepressed(x, y, button, isTouched)
-    if player.dead then
+    if Player:get().dead then
         return
     end
 
     if button == 1 then
-        spawnBullet()
-        sounds.shoot:play()
+        Player:shoot(500)
+        game.sounds.shoot:play()
     end
 end
 
-function moveTo(object, objectImage, coordinates)
-    if coordinates.x >= halfWidthSizeOf(objectImage) and
-        coordinates.y >= halfHeightSizeOf(objectImage) and
-        coordinates.x < love.graphics.getWidth() - halfWidthSizeOf(objectImage) and
-        coordinates.y < love.graphics.getHeight() - halfHeightSizeOf(objectImage) then
-            object.x = coordinates.x
-            object.y = coordinates.y
-    end
-end
+function isMovingRight() return love.keyboard.isDown('d') end
+
+function isMovingDown() return love.keyboard.isDown('s') end
+
+function isMovingLeft() return love.keyboard.isDown('a') end
+
+function isMovingTop() return love.keyboard.isDown('w') end
 
 function zombieAngle(aZombie)
-    return math.atan2(player.y - aZombie.y, player.x - aZombie.x)
-end
-
-function playMouseAngle()
-    return math.atan2(love.mouse.getY() - player.y, love.mouse.getX() - player.x)
+    return math.atan2(Player:get().y - aZombie.y, Player:get().x - aZombie.x)
 end
 
 function distanceBetween(objectOne, objectTwo)
     return math.sqrt((objectTwo.x - objectOne.x) ^ 2 + (objectTwo.y - objectOne.y) ^ 2)
-end
-
-function spawnBullet()
-    local bullet = {
-        x = player.x,
-        y = player.y,
-        speed = 500,
-        direction = playMouseAngle()
-    }
-    table.insert(bullets, bullet)
 end
 
 function isOutOfScene(object)
